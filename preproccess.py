@@ -5,9 +5,7 @@ import numpy as np
 import pandas as pd
 import pycountry
 
-from IMLearn.base import BaseEstimator
-from scipy.stats import stats
-
+LANG_DICT = {"תל אביב": "Tel Aviv", "ירושלים": "Jerusalem", "חיפה": "Haifa", }
 
 
 def load_data(path: str) -> pd.DataFrame:
@@ -21,7 +19,9 @@ def load_data(path: str) -> pd.DataFrame:
         The data as a pandas dataframe.
     """
     # remove outliers
-    return pd.read_csv(path)
+    df = pd.read_csv(path)
+    print(df[df["linqmap_city"] == "תל אביב"])
+
 
 def split_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
@@ -49,3 +49,5 @@ def preproccess(df: pd.DataFrame) -> pd.DataFrame:
 
 
 
+if __name__ == '__main__':
+    load_data("waze_data.csv")
