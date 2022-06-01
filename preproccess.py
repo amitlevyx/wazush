@@ -45,7 +45,7 @@ def split_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFra
 
 
 def preproccess(df: pd.DataFrame) -> pd.DataFrame:
-    pass
+    "       "
 
 
 
