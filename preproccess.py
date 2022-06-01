@@ -39,13 +39,13 @@ def split_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFra
     """
     together = df.sample(frac=1).reset_index(drop=True)
     return together[:int(len(together)*0.25)], \
-           together[int(len(together)*0.25):int(len(together)*0.5)], \
-           together[int(len(together)*0.5):int(len(together)*0.75)], \
+           together[int(len(together)*0.25):int(len(together)*0.375)], \
+           together[int(len(together)*0.375):int(len(together)*0.5)], \
            together[int(len(together)*0.75):]
 
 
 def preproccess(df: pd.DataFrame) -> pd.DataFrame:
-    pass
+    "       "
 
 
 
