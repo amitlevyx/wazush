@@ -1,4 +1,17 @@
 import pandas as pd
+import numpy as np
+from preproccess import preprocess_first_task, split_data
+from sklearn.linear_model import LinearRegression
+
+
+def task1_baseline_score(pred, real):
+    return np.power(pred[0] - real[0], 2) + np.power(pred[1] - real[1], 2)
+
+
+def task1_baseline(train_x, train_y):
+    learner = LinearRegression()
+    learner.fit(train_x, train_y)
+    return learner
 
 
 def task2_baseline(date, data):
