@@ -164,6 +164,8 @@ def preprocess_task2(data: pd.DataFrame):
     data = data.drop(
         columns=['linqmap_magvar', 'nComments', 'linqmap_reportMood',
                  'linqmap_nearby', 'linqmap_street', 'linqmap_city',
-                 'linqmap_reportDescription', 'x', 'y'])
+                 'linqmap_reportDescription', 'x', 'y','OBJECTID', 'pubDate', 'linqmap_roadType',
+                 'linqmap_reportMood', 'linqmap_reportRating', 'linqmap_expectedBeginDate',
+                 'linqmap_expectedEndDate', 'linqmap_reliability'])
 
     return data
