@@ -23,7 +23,7 @@ def load_data(path: str) -> pd.DataFrame:
     return pd.read_csv(path)
 
 
-def split_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def split_data(df: pd.DataFrame, labels) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame,pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Splits the data into training and test data.
 
@@ -31,16 +31,18 @@ def split_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFra
         df: The dataframe to split.
 
     Returns:
-        training 0.25
-        baseline 0.125
+        training features and labels 0.25
+        baseline features nd labels 0.125
         evaluation 0.125
         test 0.5
     """
-    together = df.sample(frac=1).reset_index(drop=True)
-    return together[:int(len(together) * 0.25)], \
-           together[int(len(together) * 0.25):int(len(together) * 0.375)], \
-           together[int(len(together) * 0.375):int(len(together) * 0.5)], \
-           together[int(len(together) * 0.5):]
+    together = df.join(labels)
+    together = together.sample(frac=1).reset_index(drop=True)
+    data, y = together.iloc[:, :-1], together.iloc[:, -1]
+    return data[:int(len(together) * 0.25)], y[:int(len(together) * 0.25)], \
+           data[int(len(together) * 0.25):int(len(together) * 0.375)], y[int(len(together) * 0.25):int(len(together) * 0.375)],\
+           data[int(len(together) * 0.375):int(len(together) * 0.5)], y[int(len(together) * 0.375):int(len(together) * 0.5)], \
+           data[int(len(together) * 0.5):], y[int(len(together) * 0.5):]
 
 
 def preprocess_first_task(data: pd.DataFrame) -> pd.DataFrame:
@@ -58,7 +60,6 @@ def preprocess_first_task(data: pd.DataFrame) -> pd.DataFrame:
                  'linqmap_expectedBeginDate', 'linqmap_reportDescription', 'linqmap_reportRating',
                  'linqmap_expectedEndDate'])
     # split to four events and fifth one
-
     labels = data[data.index % 5 == 0]
     data = data[data.index % 5 != 0]
     return data, labels

@@ -66,6 +66,6 @@ def preprocess_first_task(data: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFram
 
 
 if __name__ == '__main__':
-    df, labels = preprocess_first_task(load_data('waze_data.csv'))
+    df, labels = preprocess_first_task(load_data('../waze_data.csv'))
 
     training, baseline, evaluation, test = split_data(df)
