@@ -1,11 +1,11 @@
+from datetime import datetime
 import warnings
 from typing import Tuple
 
 import numpy as np
 import pandas as pd
 import pycountry
-
-LANG_DICT = {"תל אביב": "Tel Aviv", "ירושלים": "Jerusalem", "חיפה": "Haifa", }
+from scipy.stats import stats
 
 
 def load_data(path: str) -> pd.DataFrame:
@@ -19,8 +19,7 @@ def load_data(path: str) -> pd.DataFrame:
         The data as a pandas dataframe.
     """
     # remove outliers
-    df = pd.read_csv(path)
-    print(df[df["linqmap_city"] == "תל אביב"])
+    return pd.read_csv(path)
 
 
 def split_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -29,25 +28,36 @@ def split_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFra
 
     Args:
         df: The dataframe to split.
-        test_size: The size of the test data.
 
     Returns:
         training 0.25
-        base_estimator 0.125
+        baseline 0.125
         evaluation 0.125
         test 0.5
     """
     together = df.sample(frac=1).reset_index(drop=True)
-    return together[:int(len(together)*0.25)], \
-           together[int(len(together)*0.25):int(len(together)*0.375)], \
-           together[int(len(together)*0.375):int(len(together)*0.5)], \
-           together[int(len(together)*0.75):]
+    return together[:int(len(together) * 0.25)], \
+           together[int(len(together) * 0.25):int(len(together) * 0.375)], \
+           together[int(len(together) * 0.375):int(len(together) * 0.5)], \
+           together[int(len(together) * 0.5):]
 
 
-def preproccess(df: pd.DataFrame) -> pd.DataFrame:
-    "       "
-
+def preprocess(data: pd.DataFrame) -> pd.DataFrame:
+    # todo add try except, pandas impute reliability
+    data['pubDate'] = data['pubDate'].apply(lambda x: datetime.strptime(x, '%m/%d/%Y %H:%M:%S'))
+    data['update_date'] = data['update_date'].apply(lambda d: datetime.utcfromtimestamp(d / 1000))
+    warnings.warn('update_date not found')
+    data = pd.get_dummies(data, columns=['linqmap_type', 'linqmap_roadType', 'linqmap_subtype'])
+    warnings.warn('linqmap_type not found')
+    data = data.drop(
+        columns=['linqmap_magvar', 'nComments', 'linqmap_reportMood', 'linqmap_nearby', 'linqmap_street',
+                 'linqmap_expectedBeginDate', 'linqmap_reportDescription', 'linqmap_reportRating',
+                 'linqmap_expectedEndDate'])
+    print(data.columns)
+    return data
 
 
 if __name__ == '__main__':
-    load_data("waze_data.csv")
+    df = preprocess(load_data('waze_data.csv'))
+
+    training, baseline, evaluation, test = split_data(df)
