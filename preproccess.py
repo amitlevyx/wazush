@@ -62,7 +62,7 @@ def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
     data = pd.get_dummies(data, columns=['linqmap_type', 'linqmap_roadType', 'linqmap_subtype'])
     data['day'] = data['update_date'].apply(lambda d: d.day)
     data['day_in_month'] = data['update_date'].apply(lambda d: d.days_in_month)
-    data['day_of_week'] =data['update_date'].apply(lambda d: d.day_of_week)
+    data['day_of_week'] = data['update_date'].apply(lambda d: d.day_of_week)
     data['month'] = data['update_date'].apply(lambda d: d.month)
     data['year'] = data['update_date'].apply(lambda d: d.year)
     data['hour'] = data['update_date'].apply(lambda d: d.hour)
@@ -89,10 +89,13 @@ def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
     data = data.merge(dfs[3], on='number')
     data = data.drop(columns=['number'])
     labels = labels.drop(columns=['number'])
-    labels = labels.drop(['OBJECTID', 'pubDate', 'linqmap_reliability', 'update_date', 'linqmap_roadType_1',
+    labels = labels.drop(['OBJECTID', 'linqmap_reliability', 'linqmap_roadType_1',
                           'linqmap_roadType_2', 'linqmap_roadType_4', 'linqmap_roadType_16',
-                          'linqmap_roadType_17', 'linqmap_roadType_20', 'linqmap_roadType_22'], axis=1)
+                          'linqmap_roadType_17', 'linqmap_roadType_20', 'linqmap_roadType_22', 'day',
+                          'day_in_month', 'day_of_week', 'month', 'year', 'hour', 'minute'
+                          ], axis=1)
     return data, labels
+
 
 def preprocess_task2(data: pd.DataFrame):
     data = data.drop_duplicates(subset=['OBJECTID'])
@@ -111,11 +114,11 @@ def preprocess_task2(data: pd.DataFrame):
 
     # for each sample mark in which time slot it is
     morning_timeslot = data['update_date'].apply(lambda t: (1 if 8 <= t.hour
-                                                                <= 10 else 0))
+                                                                 <= 10 else 0))
     noon_timeslot = data['update_date'].apply(lambda t: (1 if 12 <= t.hour
-                                                                <= 14 else 0))
+                                                              <= 14 else 0))
     evening_timeslot = data['update_date'].apply(lambda t: (1 if 18 <= t.hour
-                                                                <= 20 else 0))
+                                                                 <= 20 else 0))
 
     # one-hot vector fo type
     data = pd.get_dummies(data, columns=['linqmap_type'])
@@ -135,8 +138,3 @@ def preprocess_task2(data: pd.DataFrame):
 
     return data
 
-
-if __name__ == '__main__':
-    df, labels = preprocess_first_task(load_data('waze_data.csv'))
-    df_2 = preprocess_task2(load_data('waze_data.csv'))
-    training, baseline, evaluation, test = split_data(df, labels)
