@@ -50,23 +50,15 @@ def split_data(df: pd.DataFrame, labels) -> Tuple[pd.DataFrame, pd.DataFrame, pd
 
 
 def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
-    # todo add try except, pandas impute reliability
     data = data.drop_duplicates(subset=['OBJECTID'])
     data = data.loc[data['linqmap_city'] == 'תל אביב - יפו']
     linqmap_reliability_median = data['linqmap_reliability'].median()
     data['linqmap_reliability'].fillna(value=linqmap_reliability_median, inplace=True)
     data['pubDate'] = data['pubDate'].apply(lambda x: datetime.strptime(x, '%m/%d/%Y %H:%M:%S'))
-    data['update_date'] = data['update_date'].apply(lambda d: datetime.utcfromtimestamp(d / 1000))
     data.sort_values(by='update_date', ascending=True)
     data = data.reset_index(drop=True)
     data = pd.get_dummies(data, columns=['linqmap_type', 'linqmap_roadType', 'linqmap_subtype'])
-    data['day'] = data['update_date'].apply(lambda d: d.day)
-    data['day_in_month'] = data['update_date'].apply(lambda d: d.days_in_month)
-    data['day_of_week'] = data['update_date'].apply(lambda d: d.day_of_week)
-    data['month'] = data['update_date'].apply(lambda d: d.month)
-    data['year'] = data['update_date'].apply(lambda d: d.year)
-    data['hour'] = data['update_date'].apply(lambda d: d.hour)
-    data['minute'] = data['update_date'].apply(lambda d: d.minute)
+    data = add_time_columns_to_data(data)
     data = data.drop(
         columns=['linqmap_magvar', 'pubDate', 'update_date', 'nComments', 'linqmap_reportMood', 'linqmap_nearby',
                  'linqmap_street',
@@ -78,6 +70,21 @@ def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
     data['number'] = np.ceil(data.index / 5)
     labels = data[data.index % 5 == 0]
     labels = labels[1:].reset_index(drop=True)
+    data = merge_fours_to_one_row(data)
+
+    # distance between two points
+    data = add_dist_to_data(data)
+
+    labels = labels.drop(columns=['number'])
+    labels = labels.drop(['OBJECTID', 'linqmap_reliability', 'linqmap_roadType_1',
+                          'linqmap_roadType_2', 'linqmap_roadType_4', 'linqmap_roadType_16',
+                          'linqmap_roadType_17', 'linqmap_roadType_20', 'linqmap_roadType_22', 'day',
+                          'day_in_month', 'day_of_week', 'month', 'year', 'hour', 'minute'
+                          ], axis=1)
+    return data, labels
+
+
+def merge_fours_to_one_row(data):
     data1, data2, data3, data4 = data[data.index % 5 == 1], data[data.index % 5 == 2], data[data.index % 5 == 3], data[
         data.index % 5 == 1]
     dfs = [data1, data2, data3, data4]
@@ -89,9 +96,10 @@ def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
     data = data.merge(dfs[2], on='number')
     data = data.merge(dfs[3], on='number')
     data = data.drop(columns=['number'])
+    return data
 
 
-    # distance between two points
+def add_dist_to_data(data):
     data["dist_1_2"] = data.apply(
         lambda x: distance.euclidean(x[["event_1_x", "event_1_y"]], x[["event_2_x", "event_2_y"]]), axis=1)
     data["dist_1_3"] = data.apply(
@@ -104,19 +112,19 @@ def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
         lambda x: distance.euclidean(x[["event_2_x", "event_2_y"]], x[["event_4_x", "event_4_y"]]), axis=1)
     data["dist_3_4"] = data.apply(
         lambda x: distance.euclidean(x[["event_3_x", "event_3_y"]], x[["event_4_x", "event_4_y"]]), axis=1)
+    return data
 
+def add_time_columns_to_data(data):
+    data['update_date'] = data['update_date'].apply(lambda d: datetime.utcfromtimestamp(d / 1000))
+    data['day'] = data['update_date'].apply(lambda d: d.day)
+    data['day_in_month'] = data['update_date'].apply(lambda d: d.days_in_month)
+    data['day_of_week'] = data['update_date'].apply(lambda d: d.day_of_week)
+    data['month'] = data['update_date'].apply(lambda d: d.month)
+    data['year'] = data['update_date'].apply(lambda d: d.year)
+    data['hour'] = data['update_date'].apply(lambda d: d.hour)
+    data['minute'] = data['update_date'].apply(lambda d: d.minute)
+    return data
 
-    labels = labels.drop(columns=['number'])
-    labels = labels.drop(['OBJECTID', 'linqmap_reliability', 'linqmap_roadType_1',
-                          'linqmap_roadType_2', 'linqmap_roadType_4', 'linqmap_roadType_16',
-                          'linqmap_roadType_17', 'linqmap_roadType_20', 'linqmap_roadType_22', 'day',
-                          'day_in_month', 'day_of_week', 'month', 'year', 'hour', 'minute'
-                          ], axis=1)
-    return data, labels
-
-
-def split_labels_task1(labels):
-    return labels[['x', 'y']], labels[['']]
 
 def preprocess_task2(data: pd.DataFrame):
     data = data.drop_duplicates(subset=['OBJECTID'])
@@ -124,14 +132,8 @@ def preprocess_task2(data: pd.DataFrame):
         lambda x: datetime.strptime(x, '%m/%d/%Y %H:%M:%S'))
 
     # convert update_date column to datetime format and split date and time
-    data['update_date'] = data['update_date'].apply(
-        lambda d: datetime.utcfromtimestamp(d / 1000))
-    update_date = data['update_date'].dt.date
-    update_weekday = data['update_date'].apply(lambda d: d.dayofweek)
-    update_time = data['update_date'].dt.time
+    data = add_time_columns_to_data(data)
 
-    # day in month
-    day_in_month = data['update_date'].dt.day
 
     # for each sample mark in which time slot it is
     morning_timeslot = data['update_date'].apply(lambda t: (1 if 8 <= t.hour
@@ -145,17 +147,12 @@ def preprocess_task2(data: pd.DataFrame):
     data = pd.get_dummies(data, columns=['linqmap_type'])
 
     # insert new columns and remove irrelevant columns
-    data.insert(data.shape[1], 'date', update_date)
-    data.insert(data.shape[1], 'weekday', update_weekday)
-    data.insert(data.shape[1], 'month_day', day_in_month)
-    data.insert(data.shape[1], 'time', update_time)
-    data.insert(data.shape[1], 'morning_slot', morning_timeslot)
-    data.insert(data.shape[1], 'noon_slot', noon_timeslot)
-    data.insert(data.shape[1], 'evening_slot', evening_timeslot)
+    data['morning_slot'] = morning_timeslot
+    data['noon_slot'] = noon_timeslot
+    data['evening_slot'] = evening_timeslot
     data = data.drop(
         columns=['linqmap_magvar', 'nComments', 'linqmap_reportMood',
                  'linqmap_nearby', 'linqmap_street', 'linqmap_city',
-                 'linqmap_reportDescription'])
+                 'linqmap_reportDescription', 'x', 'y'])
 
     return data
-
