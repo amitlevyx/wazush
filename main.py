@@ -1,7 +1,9 @@
 import numpy as np
 
+import baselines
 from estimator import Estimator
-from preproccess import preprocess_first_task, load_data, split_data
+from preproccess import preprocess_first_task, load_data, split_data, preprocess_task2
+
 
 if __name__ == '__main__':
 
@@ -23,17 +25,21 @@ if __name__ == '__main__':
                                'linqmap_subtype_ROAD_CLOSED_EVENT']
 
     df, labels = preprocess_first_task(load_data('waze_data.csv'))
-
+    labels = labels.drop(columns=types_and_subtypes_cols, axis=1)
     training_X, training_y, baseline_X, baseline_y, evaluation_X, evaluation_y, test_X, test_y = split_data(df, labels)
-    baseline_y_classifier = baseline_y.drop(['x', 'y'], axis=1)
-    classifier_labels = training_y.drop(['x', 'y'], axis=1)
-    reg_labels = training_y.drop(types_and_subtypes_cols, axis=1)
-    # todo: print(df.corr().abs().sort_values(ascending=False))
-
-    model = Estimator()
-
-    model.fit_classifier(training_X.to_numpy(), classifier_labels.to_numpy())
-    pred = model.predict_classifier(training_X.to_numpy())
-    print("The f1score is:", model.loss_classifier(training_X, classifier_labels))
-    print("The f1score is:", model.loss_classifier(baseline_X, baseline_y_classifier))
-    print("yay!!11")
+    task1_baseline = baselines.task1_baseline(training_X, training_y)
+    print(baselines.task1_baseline_score(task1_baseline.predict(baseline_X), baseline_y.to_numpy()))
+    df = preprocess_task2(load_data('waze_data.csv'))
+    #
+    # # baseline_y_classifier = baseline_y.drop(['x', 'y'], axis=1)
+    # # classifier_labels = training_y.drop(['x', 'y'], axis=1)
+    # # reg_labels = training_y.drop(types_and_subtypes_cols, axis=1)
+    # # # todo: print(df.corr().abs().sort_values(ascending=False))
+    #
+    # model = Estimator()
+    #
+    # model.fit_classifier(training_X.to_numpy(), classifier_labels.to_numpy())
+    # pred = model.predict_classifier(training_X.to_numpy())
+    # print("The f1score is:", model.loss_classifier(training_X, classifier_labels))
+    # print("The f1score is:", model.loss_classifier(baseline_X, baseline_y_classifier))
+    # print("yay!!11")
