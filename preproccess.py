@@ -81,4 +81,4 @@ def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
 if __name__ == '__main__':
     df, labels = preprocess_first_task(load_data('waze_data.csv'))
 
-    training, baseline, evaluation, test = split_data(df, labels)
+    training_f, training_l, baseline_f, baseline_l, evaluation_f, evaluation_l, test_f, test_l = split_data(df, labels)
