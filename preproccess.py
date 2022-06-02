@@ -5,9 +5,10 @@ from scipy.spatial import distance
 
 import numpy as np
 import pandas as pd
-import pycountry
 from scipy.stats import stats
 from sklearn.neighbors import KDTree
+from sklearn.impute import SimpleImputer
+
 
 
 def load_data(path: str) -> pd.DataFrame:
@@ -49,11 +50,19 @@ def split_data(df: pd.DataFrame, labels) -> Tuple[pd.DataFrame, pd.DataFrame, pd
         len(together) * 0.5)], \
            data[int(len(together) * 0.5):], y[int(len(together) * 0.5):]
 
+def impute_subtypes(data: pd.DataFrame):
+    imp = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
+    new_subtypes = imp.fit_transform(data['linqmap_subtype'].values.reshape(
+        -1,1))
+    return new_subtypes
+
 
 def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
     data = data.drop_duplicates(subset=['OBJECTID'])
     data = data.loc[data['linqmap_city'] == 'תל אביב - יפו']
     linqmap_reliability_median = data['linqmap_reliability'].median()
+    data['linqmap_subtype'] = impute_subtypes(data[['linqmap_type',
+                                                    'linqmap_subtype']])
     data['linqmap_reliability'].fillna(value=linqmap_reliability_median, inplace=True)
     data['pubDate'] = data['pubDate'].apply(lambda x: datetime.strptime(x, '%m/%d/%Y %H:%M:%S'))
     data.sort_values(by='update_date', ascending=True)
@@ -119,7 +128,7 @@ def add_time_columns_to_data(data):
     data['update_date'] = data['update_date'].apply(lambda d: datetime.utcfromtimestamp(d / 1000))
     data['day'] = data['update_date'].apply(lambda d: d.day)
     data['day_in_month'] = data['update_date'].apply(lambda d: d.days_in_month)
-    data['day_of_week'] = data['update_date'].apply(lambda d: d.day_of_week)
+    data['day_of_week'] = data['update_date'].apply(lambda d: d.dayofweek)
     data['month'] = data['update_date'].apply(lambda d: d.month)
     data['year'] = data['update_date'].apply(lambda d: d.year)
     data['hour'] = data['update_date'].apply(lambda d: d.hour)
