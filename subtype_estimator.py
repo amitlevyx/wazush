@@ -1,34 +1,25 @@
 from __future__ import annotations
 
-from typing import NoReturn, Tuple
-
-import numpy as np
-from sklearn.ensemble import AdaBoostClassifier, BaggingClassifier, ExtraTreesClassifier, GradientBoostingClassifier, \
-    RandomForestClassifier
-from sklearn.impute import SimpleImputer
-from sklearn.linear_model import Lasso, PoissonRegressor, TweedieRegressor, Ridge
+from sklearn.ensemble import ExtraTreesClassifier, RandomForestClassifier, \
+    BaggingClassifier
 from sklearn.metrics import f1_score
-from sklearn.multioutput import MultiOutputClassifier
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
-from sklearn.dummy import DummyRegressor
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
 
 
-class Estimator:
+class SubtypeEstimator:
 
     def __init__(self, estimators):
-        # Baseline
+        # # Baseline
         # self._classifier = DecisionTreeClassifier()
 
-        # f1 on train - 0.666, f1 on evaluation - 0.097
+        # f1 on train - 0.571, f1 on evaluation - 0.059
         # self._classifier = RandomForestClassifier(n_estimators=estimators)
 
-        # f1 on train - 0.666, f1 on evaluation - 0.099
+        # f1 on train - 0.571, f1 on evaluation - 0.057
         # self._classifier = ExtraTreesClassifier()
 
-        # f1 on train - 0.666, f1 on evaluation - 0.136 (1 neighbor)
+        # f1 on train - 0.571, f1 on evaluation - 0.088 (1 neighbor)
         # self._classifier = KNeighborsClassifier(n_neighbors=estimators)
 
         # f1 on train - , f1 on evaluation -
