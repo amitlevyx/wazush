@@ -9,22 +9,25 @@ from sklearn.tree import DecisionTreeClassifier
 
 class TypeEstimator:
 
-    def __init__(self, estimators):
+    def __init__(self, estimators, depth):
         # # Baseline
         # self._classifier = DecisionTreeClassifier()
 
         # f1 on train - 1, f1 on evaluation - 0.226
-        # self._classifier = RandomForestClassifier(n_estimators=estimators)
+        # max type evaluation f1score: 0.283, with max_depth=11
+        # self._classifier = RandomForestClassifier(max_depth=estimators)
 
         # f1 on train - 1, f1 on evaluation - 0.214
-        # self._classifier = ExtraTreesClassifier()
+        # max type evaluation score: 0.267, with max_depth=14
+        self._classifier = ExtraTreesClassifier(n_estimators=estimators,
+        max_depth=depth)
 
         # f1 on train - 1, f1 on evaluation - 0.303 (1 neighbor)
         # self._classifier = KNeighborsClassifier(n_neighbors=estimators)
 
         # f1 on train - , f1 on evaluation -
-        self._classifier = BaggingClassifier(ExtraTreesClassifier(
-            n_estimators=estimators))
+        # self._classifier = BaggingClassifier(ExtraTreesClassifier(
+        #     n_estimators=estimators))
 
 
     def fit_classifier(self, X, y):

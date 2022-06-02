@@ -18,22 +18,25 @@ from sklearn.neighbors import KNeighborsClassifier
 
 class Estimator:
 
-    def __init__(self, estimators):
+    def __init__(self, estimators, depth):
         # Baseline
         # self._classifier = DecisionTreeClassifier()
 
         # f1 on train - 0.666, f1 on evaluation - 0.097
-        # self._classifier = RandomForestClassifier(n_estimators=estimators)
+        # max evaluation f1score: 0.108, with max_depth=18
+        # self._classifier = RandomForestClassifier(max_depth=estimators)
 
         # f1 on train - 0.666, f1 on evaluation - 0.099
-        # self._classifier = ExtraTreesClassifier()
+        # max evaluation score: 0.103, with max_depth=11
+        self._classifier = ExtraTreesClassifier(n_estimators=estimators,
+        max_depth=depth)
 
         # f1 on train - 0.666, f1 on evaluation - 0.136 (1 neighbor)
         # self._classifier = KNeighborsClassifier(n_neighbors=estimators)
 
         # f1 on train - , f1 on evaluation -
-        self._classifier = BaggingClassifier(ExtraTreesClassifier(
-            n_estimators=estimators))
+        # self._classifier = BaggingClassifier(ExtraTreesClassifier(
+        #     n_estimators=estimators))
 
     def fit_classifier(self, X, y):
         self._classifier.fit(X, y)
