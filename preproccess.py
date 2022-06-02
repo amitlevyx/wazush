@@ -51,9 +51,10 @@ def split_data(df: pd.DataFrame, labels) -> Tuple[pd.DataFrame, pd.DataFrame, pd
 
 def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
     # todo add try except, pandas impute reliability
+    data = data.drop_duplicates(subset=['OBJECTID'])
     data = data.loc[data['linqmap_city'] == 'תל אביב - יפו']
-    linqmap_reliability_mean = data['linqmap_reliability'].mean()
-    data['linqmap_reliability'].fillna(value=linqmap_reliability_mean, inplace=True)
+    linqmap_reliability_median = data['linqmap_reliability'].median()
+    data['linqmap_reliability'].fillna(value=linqmap_reliability_median, inplace=True)
     data['pubDate'] = data['pubDate'].apply(lambda x: datetime.strptime(x, '%m/%d/%Y %H:%M:%S'))
     data['update_date'] = data['update_date'].apply(lambda d: datetime.utcfromtimestamp(d / 1000))
     data.sort_values(by='update_date', ascending=True)
@@ -97,6 +98,7 @@ def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
 
 
 def preprocess_task2(data: pd.DataFrame):
+    data = data.drop_duplicates(subset=['OBJECTID'])
     data['pubDate'] = data['pubDate'].apply(
         lambda x: datetime.strptime(x, '%m/%d/%Y %H:%M:%S'))
 
@@ -135,3 +137,4 @@ def preprocess_task2(data: pd.DataFrame):
                  'linqmap_reportDescription'])
 
     return data
+
