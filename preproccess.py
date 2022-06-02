@@ -100,7 +100,7 @@ def merge_fours_to_one_row(data):
     for i in range(len(dfs)):
         dfs[i] = dfs[i].add_prefix('event_' + str(i + 1) + '_')
         dfs[i]['test_set'] = dfs[i]['event_' + str(i + 1) + '_test_set']
-        dfs[i] = dfs[i].drop(columns=['event_' + str(i + 1) + 'test_set'])
+        dfs[i] = dfs[i].drop(columns=['event_' + str(i + 1) + '_test_set'])
     data = dfs[0].merge(dfs[1], on='test_set')
     data = data.merge(dfs[2], on='test_set')
     data = data.merge(dfs[3], on='test_set')
