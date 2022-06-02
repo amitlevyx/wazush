@@ -84,6 +84,7 @@ def score_func(y_true, y_pred, x_true, x_pred):
     df["score"] = df.apply(lambda x: ((x["x_true"] - x["x_pred"]) ** 2) + ((x["y_true"] - x["y_pred"]) ** 2), axis=1)
     return df["score"].mean()
 
+
     # return task1_baseline_score(pred, true)
 class Estimator:
 
@@ -102,38 +103,37 @@ class Estimator:
         return mean_squared_error(y, self.predict_classifier(X))
 
 if __name__ == '__main__':
-    np.random.seed(0)
+    # np.random.seed(0)
     df, labels = preprocess_first_task(load_data('waze_data.csv'))
     training_X, training_y, baseline_X, baseline_y, evaluation_X, evaluation_y, test_X, test_y = split_data(df, labels)
+    " combine training and baseline data "
+    baseline_X = pd.concat([evaluation_X, baseline_X], axis=0)
+    baseline_y = pd.concat([evaluation_y, baseline_y], axis=0)
     x_true = pre_label("x", training_y)
     y_true = pre_label("y", training_y)
+    x_base = pre_for_x(baseline_X)
+    y_base = pre_for_y(baseline_X)
 
-    estimator_x_f = RandomForestRegressor(n_estimators=300, random_state=0)
+    estimator_x_f = RandomForestRegressor(n_estimators=1000, random_state=0)
     estimator_x_f.fit(pre_for_x(training_X), x_true)
 
-    estimator_y_f = RandomForestRegressor(n_estimators=300, random_state=0)
+    estimator_y_f = RandomForestRegressor(n_estimators=1000, random_state=0)
     estimator_y_f.fit(pre_for_y(training_X), y_true)
 
-    kernel = DotProduct() + WhiteKernel()
-    estimator_x_l = GaussianProcessRegressor(kernel=kernel, random_state=0, alpha=10, optimizer="fmin_l_bfgs_b")
-    estimator_x_l.fit(pre_for_x(training_X), x_true)
-    estimator_x_l.fit(pre_for_x(training_X), x_true)
-
-    estimator_y_l = GaussianProcessRegressor(kernel=kernel,random_state=0,alpha=10)
-    estimator_y_l.fit(pre_for_y(training_X), y_true)
-    estimator_x_l.fit(pre_for_x(training_X), x_true)
-
     print("Random Forest")
-    x_pred = estimator_x_f.predict(pre_for_x(baseline_X))
-    y_pred = estimator_y_f.predict(pre_for_y(baseline_X))
-    print(mean_squared_error(pre_label("x",baseline_y), x_pred))
-    print(mean_squared_error(pre_label("y",baseline_y), y_pred))
-    print(score_func(pre_label("y",baseline_y), y_pred, pre_label("x",baseline_y), x_pred))
+    x_pred_1 = estimator_x_f.predict(pre_for_x(baseline_X))
+    y_pred_1 = estimator_y_f.predict(pre_for_y(baseline_X))
+    print(mean_squared_error(pre_label("x",baseline_y), x_pred_1))
+    print(mean_squared_error(pre_label("y",baseline_y), y_pred_1))
+    print(score_func(pre_label("y",baseline_y), y_pred_1, pre_label("x",baseline_y), x_pred_1))
     print("Gaussian Process")
     x_pred = estimator_x_l.predict(pre_for_x(baseline_X))
     y_pred = estimator_y_l.predict(pre_for_y(baseline_X))
     print(mean_squared_error(pre_label("x",baseline_y), x_pred))
     print(mean_squared_error(pre_label("y",baseline_y), y_pred))
+    print(score_func(pre_label("y",baseline_y), y_pred, pre_label("x",baseline_y), x_pred))
+    x_pred = (x_pred + x_pred_1) / 2
+    y_pred = (y_pred + y_pred_1)/2
     print(score_func(pre_label("y",baseline_y), y_pred, pre_label("x",baseline_y), x_pred))
 
 
