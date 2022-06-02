@@ -55,6 +55,7 @@ def preprocess(data: pd.DataFrame) -> pd.DataFrame:
     return data
 
 
+
 if __name__ == '__main__':
     df = preprocess(load_data('waze_data.csv'))
 
