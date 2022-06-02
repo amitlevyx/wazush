@@ -56,7 +56,7 @@ def impute_subtypes(data: pd.DataFrame):
     return new_subtypes
 
 
-def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
+def preprocess_first_task(data: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
     data = data.drop_duplicates(subset=['OBJECTID'])
     data = data.loc[data['linqmap_city'] == 'תל אביב - יפו']
     linqmap_reliability_median = data['linqmap_reliability'].median()
@@ -76,7 +76,7 @@ def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
 
     # split to four events and fifth one
 
-    data['number'] = np.ceil(data.index / 5)
+    data['test_set'] = np.ceil(data.index / 5)
     labels = data[data.index % 5 == 0]
     labels = labels[1:].reset_index(drop=True)
     data = merge_fours_to_one_row(data)
@@ -84,27 +84,27 @@ def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
     # distance between two points
     data = add_dist_to_data(data)
 
-    labels = labels.drop(columns=['number'])
+    labels = labels.drop(columns=['test_set'])
     labels = labels.drop(['OBJECTID', 'linqmap_reliability', 'linqmap_roadType_1',
                           'linqmap_roadType_2', 'linqmap_roadType_4', 'linqmap_roadType_16',
                           'linqmap_roadType_17', 'linqmap_roadType_20', 'linqmap_roadType_22', 'day',
-                          'day_in_month', 'day_of_week', 'month', 'year', 'hour', 'minute'
+                          'day_in_month', 'day_of_week', 'month', 'year', 'hour', 'minute', 'weekend', 'not_weekend'
                           ], axis=1)
     return data, labels
 
 
 def merge_fours_to_one_row(data):
     data1, data2, data3, data4 = data[data.index % 5 == 1], data[data.index % 5 == 2], data[data.index % 5 == 3], data[
-        data.index % 5 == 1]
+        data.index % 5 == 4]
     dfs = [data1, data2, data3, data4]
     for i in range(len(dfs)):
         dfs[i] = dfs[i].add_prefix('event_' + str(i + 1) + '_')
-        dfs[i]['number'] = dfs[i]['event_' + str(i + 1) + '_number']
-        dfs[i] = dfs[i].drop(columns=['event_' + str(i + 1) + '_number'])
-    data = dfs[0].merge(dfs[1], on='number')
-    data = data.merge(dfs[2], on='number')
-    data = data.merge(dfs[3], on='number')
-    data = data.drop(columns=['number'])
+        dfs[i]['test_set'] = dfs[i]['event_' + str(i + 1) + '_test_set']
+        dfs[i] = dfs[i].drop(columns=['event_' + str(i + 1) + '_test_set'])
+    data = dfs[0].merge(dfs[1], on='test_set')
+    data = data.merge(dfs[2], on='test_set')
+    data = data.merge(dfs[3], on='test_set')
+    data = data.drop(columns=['test_set'])
     return data
 
 
@@ -123,11 +123,14 @@ def add_dist_to_data(data):
         lambda x: distance.euclidean(x[["event_3_x", "event_3_y"]], x[["event_4_x", "event_4_y"]]), axis=1)
     return data
 
+
 def add_time_columns_to_data(data):
     data['update_date'] = data['update_date'].apply(lambda d: datetime.utcfromtimestamp(d / 1000))
     data['day'] = data['update_date'].apply(lambda d: d.day)
     data['day_in_month'] = data['update_date'].apply(lambda d: d.days_in_month)
-    data['day_of_week'] = data['update_date'].apply(lambda d: d.dayofweek)
+    data['day_of_week'] = data['update_date'].apply(lambda d: d.day_of_week)
+    data['not_weekend'] = data['update_date'].apply(lambda d: 1 if d.day_of_week in [0, 4, 5, 6] else 0)
+    data['weekend'] = data['update_date'].apply(lambda d: 1 if d.day_of_week in [1, 2, 3] else 0)
     data['month'] = data['update_date'].apply(lambda d: d.month)
     data['year'] = data['update_date'].apply(lambda d: d.year)
     data['hour'] = data['update_date'].apply(lambda d: d.hour)
@@ -142,7 +145,6 @@ def preprocess_task2(data: pd.DataFrame):
 
     # convert update_date column to datetime format and split date and time
     data = add_time_columns_to_data(data)
-
 
     # for each sample mark in which time slot it is
     morning_timeslot = data['update_date'].apply(lambda t: (1 if 8 <= t.hour

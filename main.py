@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-
 import baselines
 from estimator import Estimator
 from preproccess import preprocess_first_task, load_data, split_data, \
@@ -9,7 +8,6 @@ from subtype_estimator import SubtypeEstimator
 from type_estimator import TypeEstimator
 
 def run_baseline(df, labels):
-
     training_X, training_y, baseline_X, baseline_y, evaluation_X, \
     evaluation_y, test_X, test_y = split_data(df, labels)
 
@@ -132,6 +130,4 @@ if __name__ == '__main__':
 
     df, labels = preprocess_first_task(load_data('waze_data.csv'))
     validation(df, labels)
-
-
     # print("yay!!11")
