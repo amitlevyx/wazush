@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import pycountry
 from scipy.stats import stats
+from sklearn.neighbors import KDTree
 
 
 def load_data(path: str) -> pd.DataFrame:
@@ -46,14 +47,11 @@ def preprocess(data: pd.DataFrame) -> pd.DataFrame:
     # todo add try except, pandas impute reliability
     data['pubDate'] = data['pubDate'].apply(lambda x: datetime.strptime(x, '%m/%d/%Y %H:%M:%S'))
     data['update_date'] = data['update_date'].apply(lambda d: datetime.utcfromtimestamp(d / 1000))
-    warnings.warn('update_date not found')
     data = pd.get_dummies(data, columns=['linqmap_type', 'linqmap_roadType', 'linqmap_subtype'])
-    warnings.warn('linqmap_type not found')
     data = data.drop(
         columns=['linqmap_magvar', 'nComments', 'linqmap_reportMood', 'linqmap_nearby', 'linqmap_street',
                  'linqmap_expectedBeginDate', 'linqmap_reportDescription', 'linqmap_reportRating',
                  'linqmap_expectedEndDate'])
-    print(data.columns)
     return data
 
 
