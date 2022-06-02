@@ -92,3 +92,43 @@ def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
                           'linqmap_roadType_2', 'linqmap_roadType_4', 'linqmap_roadType_16',
                           'linqmap_roadType_17', 'linqmap_roadType_20', 'linqmap_roadType_22'], axis=1)
     return data, labels
+
+def preprocess_task2(data: pd.DataFrame):
+    data['pubDate'] = data['pubDate'].apply(
+        lambda x: datetime.strptime(x, '%m/%d/%Y %H:%M:%S'))
+
+    # convert update_date column to datetime format and split date and time
+    data['update_date'] = data['update_date'].apply(
+        lambda d: datetime.utcfromtimestamp(d / 1000))
+    update_date = data['update_date'].dt.date
+    update_weekday = data['update_date'].apply(lambda d: d.dayofweek)
+    update_time = data['update_date'].dt.time
+
+    # day in month
+    day_in_month = data['update_date'].dt.day
+
+    # for each sample mark in which time slot it is
+    morning_timeslot = data['update_date'].apply(lambda t: (1 if 8 <= t.hour
+                                                                <= 10 else 0))
+    noon_timeslot = data['update_date'].apply(lambda t: (1 if 12 <= t.hour
+                                                                <= 14 else 0))
+    evening_timeslot = data['update_date'].apply(lambda t: (1 if 18 <= t.hour
+                                                                <= 20 else 0))
+
+    # one-hot vector fo type
+    data = pd.get_dummies(data, columns=['linqmap_type'])
+
+    # insert new columns and remove irrelevant columns
+    data.insert(data.shape[1], 'date', update_date)
+    data.insert(data.shape[1], 'weekday', update_weekday)
+    data.insert(data.shape[1], 'month_day', day_in_month)
+    data.insert(data.shape[1], 'time', update_time)
+    data.insert(data.shape[1], 'morning_slot', morning_timeslot)
+    data.insert(data.shape[1], 'noon_slot', noon_timeslot)
+    data.insert(data.shape[1], 'evening_slot', evening_timeslot)
+    data = data.drop(
+        columns=['linqmap_magvar', 'nComments', 'linqmap_reportMood',
+                 'linqmap_nearby', 'linqmap_street', 'linqmap_city',
+                 'linqmap_reportDescription'])
+
+    return data
