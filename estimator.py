@@ -16,5 +16,16 @@ from sklearn.tree import DecisionTreeClassifier
 from IMLearn.base import BaseEstimator
 
 
+class Estimator:
 
-def fit(X, y):
+    def __init__(self) -> BaseEstimator:
+        self._classifier = RandomForestClassifier()
+
+    def fit_classifier(self, X, y):
+        self._classifier.fit(X, y)
+
+    def predict_classifier(self, X):
+        return self._classifier.predict(X)
+
+    def loss_classifier(self, X, y):
+        return f1_score(y, self.predict_classifier(X), average='macro')

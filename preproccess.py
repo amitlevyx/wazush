@@ -23,7 +23,7 @@ def load_data(path: str) -> pd.DataFrame:
     return pd.read_csv(path)
 
 
-def split_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def split_data(df: pd.DataFrame, labels) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Splits the data into training and test data.
 
@@ -73,10 +73,13 @@ def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
     data = data.merge(dfs[3], on='number')
     data = data.drop(columns=['number'])
     labels = labels.drop(columns=['number'])
+    labels = labels.drop(['OBJECTID', 'pubDate', 'linqmap_reliability', 'update_date', 'linqmap_roadType_1',
+                 'linqmap_roadType_2', 'linqmap_roadType_4', 'linqmap_roadType_16',
+                 'linqmap_roadType_17', 'linqmap_roadType_20', 'linqmap_roadType_22'])
     return data, labels
 
 
 if __name__ == '__main__':
     df, labels = preprocess_first_task(load_data('waze_data.csv'))
 
-    training, baseline, evaluation, test = split_data(df, labels)
+    # training_X, baseline_X, evaluation_X, test_X, training_y, baseline_y, evaluation_y, test_y  = split_data(df, labels)
