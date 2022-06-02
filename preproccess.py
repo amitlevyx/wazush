@@ -88,19 +88,19 @@ def preprocess_first_task(data: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFram
     labels = labels.drop(['OBJECTID', 'linqmap_reliability', 'linqmap_roadType_1',
                           'linqmap_roadType_2', 'linqmap_roadType_4', 'linqmap_roadType_16',
                           'linqmap_roadType_17', 'linqmap_roadType_20', 'linqmap_roadType_22', 'day',
-                          'day_in_month', 'day_of_week', 'month', 'year', 'hour', 'minute'
+                          'day_in_month', 'day_of_week', 'month', 'year', 'hour', 'minute', 'weekend', 'not_weekend'
                           ], axis=1)
     return data, labels
 
 
 def merge_fours_to_one_row(data):
     data1, data2, data3, data4 = data[data.index % 5 == 1], data[data.index % 5 == 2], data[data.index % 5 == 3], data[
-        data.index % 5 == 1]
+        data.index % 5 == 4]
     dfs = [data1, data2, data3, data4]
     for i in range(len(dfs)):
         dfs[i] = dfs[i].add_prefix('event_' + str(i + 1) + '_')
         dfs[i]['test_set'] = dfs[i]['event_' + str(i + 1) + '_test_set']
-        dfs[i] = dfs[i].drop(columns=['event_' + str(i + 1) + 'test_set'])
+        dfs[i] = dfs[i].drop(columns=['event_' + str(i + 1) + '_test_set'])
     data = dfs[0].merge(dfs[1], on='test_set')
     data = data.merge(dfs[2], on='test_set')
     data = data.merge(dfs[3], on='test_set')
