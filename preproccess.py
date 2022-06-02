@@ -1,6 +1,6 @@
 from datetime import datetime
 import warnings
-from typing import Tuple
+from typing import Tuple, Any
 
 import numpy as np
 import pandas as pd
@@ -45,7 +45,7 @@ def split_data(df: pd.DataFrame, labels) -> Tuple[pd.DataFrame, pd.DataFrame, pd
            data[int(len(together) * 0.5):], y[int(len(together) * 0.5):]
 
 
-def preprocess_first_task(data: pd.DataFrame) -> pd.DataFrame:
+def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
     # todo add try except, pandas impute reliability
     data = data.loc[data['linqmap_city'] == 'תל אביב - יפו']
     linqmap_reliability_mean = data['linqmap_reliability'].mean()
@@ -58,15 +58,27 @@ def preprocess_first_task(data: pd.DataFrame) -> pd.DataFrame:
     data = data.drop(
         columns=['linqmap_magvar', 'nComments', 'linqmap_reportMood', 'linqmap_nearby', 'linqmap_street',
                  'linqmap_expectedBeginDate', 'linqmap_reportDescription', 'linqmap_reportRating',
-                 'linqmap_expectedEndDate'])
+                 'linqmap_expectedEndDate', 'linqmap_city'])
     # split to four events and fifth one
-    labels = data[data.index % 5 == 0]
-    data = data[data.index % 5 != 0]
-    return data, labels
 
+    data['number'] = np.ceil(data.index / 5)
+    labels = data[data.index % 5 == 0]
+    data1, data2, data3, data4 = data[data.index % 5 == 1], data[data.index % 5 == 2], data[data.index % 5 == 3], data[
+        data.index % 5 == 1]
+    dfs = [data1, data2, data3, data4]
+    for i in range(len(dfs)):
+        dfs[i] = dfs[i].add_prefix('event_' + str(i + 1) + '_')
+        dfs[i]['number'] = dfs[i]['event_' + str(i + 1) + '_number']
+        dfs[i] = dfs[i].drop(columns=['event_' + str(i + 1) + '_number'])
+    data = dfs[0].merge(dfs[1], on='number')
+    data = data.merge(dfs[2], on='number')
+    data = data.merge(dfs[3], on='number')
+    data = data.drop(columns=['number'])
+    labels = labels.drop(columns=['number'])
+    return data, labels
 
 
 if __name__ == '__main__':
     df, labels = preprocess_first_task(load_data('waze_data.csv'))
 
-    training_features,training_labels, baseline_f,baseline_l, evaluation_f, evaluation_l, test_f, test_l = split_data(df, labels)
+    training, baseline, evaluation, test = split_data(df, labels)
