@@ -1,6 +1,7 @@
 from datetime import datetime
 import warnings
 from typing import Tuple, Any
+from scipy.spatial import distance
 
 import numpy as np
 import pandas as pd
@@ -72,6 +73,7 @@ def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
                  'linqmap_street',
                  'linqmap_expectedBeginDate', 'linqmap_reportDescription', 'linqmap_reportRating',
                  'linqmap_expectedEndDate', 'linqmap_city'])
+
     # split to four events and fifth one
 
     data['number'] = np.ceil(data.index / 5)
@@ -88,6 +90,23 @@ def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
     data = data.merge(dfs[2], on='number')
     data = data.merge(dfs[3], on='number')
     data = data.drop(columns=['number'])
+
+
+    # distance between two points
+    data["dist_1_2"] = data.apply(
+        lambda x: distance.euclidean(x[["event_1_x", "event_1_y"]], x[["event_2_x", "event_2_y"]]), axis=1)
+    data["dist_1_3"] = data.apply(
+        lambda x: distance.euclidean(x[["event_1_x", "event_1_y"]], x[["event_3_x", "event_3_y"]]), axis=1)
+    data["dist_1_4"] = data.apply(
+        lambda x: distance.euclidean(x[["event_1_x", "event_1_y"]], x[["event_4_x", "event_4_y"]]), axis=1)
+    data["dist_2_3"] = data.apply(
+        lambda x: distance.euclidean(x[["event_2_x", "event_2_y"]], x[["event_3_x", "event_3_y"]]), axis=1)
+    data["dist_2_4"] = data.apply(
+        lambda x: distance.euclidean(x[["event_2_x", "event_2_y"]], x[["event_4_x", "event_4_y"]]), axis=1)
+    data["dist_3_4"] = data.apply(
+        lambda x: distance.euclidean(x[["event_3_x", "event_3_y"]], x[["event_4_x", "event_4_y"]]), axis=1)
+
+
     labels = labels.drop(columns=['number'])
     labels = labels.drop(['OBJECTID', 'linqmap_reliability', 'linqmap_roadType_1',
                           'linqmap_roadType_2', 'linqmap_roadType_4', 'linqmap_roadType_16',
@@ -96,6 +115,9 @@ def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
                           ], axis=1)
     return data, labels
 
+
+def split_labels_task1(labels):
+    return labels[['x', 'y']], labels[['']]
 
 def preprocess_task2(data: pd.DataFrame):
     data = data.drop_duplicates(subset=['OBJECTID'])

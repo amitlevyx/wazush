@@ -1,9 +1,10 @@
 import numpy as np
 
-from wazush.estimator import Estimator
-from wazush.preproccess import preprocess_first_task, load_data, split_data
+from estimator import Estimator
+from preproccess import preprocess_first_task, load_data, split_data
 
 if __name__ == '__main__':
+
     np.random.seed(0)
     types_and_subtypes_cols = ['linqmap_type_ACCIDENT', 'linqmap_type_JAM',
                                'linqmap_type_ROAD_CLOSED', 'linqmap_type_WEATHERHAZARD',

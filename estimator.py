@@ -14,12 +14,11 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.dummy import DummyRegressor
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
-from IMLearn.base import BaseEstimator
 
 
 class Estimator:
 
-    def __init__(self) -> BaseEstimator:
+    def __init__(self) :
         self._classifier = MultiOutputClassifier(KNeighborsClassifier(225))
         # self._classifier = RandomForestClassifier()
 
