@@ -43,20 +43,29 @@ def split_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFra
            together[int(len(together) * 0.5):]
 
 
-def preprocess(data: pd.DataFrame) -> pd.DataFrame:
+def preprocess_first_task(data: pd.DataFrame) -> pd.DataFrame:
     # todo add try except, pandas impute reliability
+    data = data.loc[data['linqmap_city'] == 'תל אביב - יפו']
+    linqmap_reliability_mean = data['linqmap_reliability'].mean()
+    data['linqmap_reliability'].fillna(value=linqmap_reliability_mean, inplace=True)
     data['pubDate'] = data['pubDate'].apply(lambda x: datetime.strptime(x, '%m/%d/%Y %H:%M:%S'))
     data['update_date'] = data['update_date'].apply(lambda d: datetime.utcfromtimestamp(d / 1000))
+    data.sort_values(by='update_date', ascending=True)
+    data = data.reset_index(drop=True)
     data = pd.get_dummies(data, columns=['linqmap_type', 'linqmap_roadType', 'linqmap_subtype'])
     data = data.drop(
         columns=['linqmap_magvar', 'nComments', 'linqmap_reportMood', 'linqmap_nearby', 'linqmap_street',
                  'linqmap_expectedBeginDate', 'linqmap_reportDescription', 'linqmap_reportRating',
                  'linqmap_expectedEndDate'])
-    return data
+    # split to four events and fifth one
+
+    labels = data[data.index % 5 == 0]
+    data = data[data.index % 5 != 0]
+    return data, labels
 
 
 
 if __name__ == '__main__':
-    df = preprocess(load_data('waze_data.csv'))
+    df, labels = preprocess_first_task(load_data('waze_data.csv'))
 
-    training, baseline, evaluation, test = split_data(df)
+    training, baseline, evaluation, test = split_data(df, labels)
