@@ -61,10 +61,11 @@ def preprocess_first_task(data: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFram
 
     labels = data[data.index % 5 == 0]
     data = data[data.index % 5 != 0]
-    # data = df.groupby(np.repeat(np.arange(len(df)), 4)[:len(df)]).agg(' '.join)
+    data = df.groupby(np.repeat(np.arange(len(df)), 4)[:len(df)]).agg(' '.join)
     return data, labels
 
 
 if __name__ == '__main__':
-    df, labels = preprocess_first_task(load_data('waze_data.csv'))
-    training, baseline, evaluation, test = split_data(df, labels)
+    df, labels = preprocess_first_task(load_data('../waze_data.csv'))
+
+    training, baseline, evaluation, test = split_data(df)

@@ -23,7 +23,7 @@ def load_data(path: str) -> pd.DataFrame:
     return pd.read_csv(path)
 
 
-def split_data(df: pd.DataFrame, labels) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def split_data(df: pd.DataFrame, labels) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame,pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Splits the data into training and test data.
 
@@ -31,16 +31,18 @@ def split_data(df: pd.DataFrame, labels) -> Tuple[pd.DataFrame, pd.DataFrame, pd
         df: The dataframe to split.
 
     Returns:
-        training 0.25
-        baseline 0.125
+        training features and labels 0.25
+        baseline features nd labels 0.125
         evaluation 0.125
         test 0.5
     """
-    together = df.sample(frac=1).reset_index(drop=True)
-    return together[:int(len(together) * 0.25)], \
-           together[int(len(together) * 0.25):int(len(together) * 0.375)], \
-           together[int(len(together) * 0.375):int(len(together) * 0.5)], \
-           together[int(len(together) * 0.5):]
+    together = df.join(labels)
+    together = together.sample(frac=1).reset_index(drop=True)
+    data, y = together.iloc[:, :-1], together.iloc[:, -1]
+    return data[:int(len(together) * 0.25)], y[:int(len(together) * 0.25)], \
+           data[int(len(together) * 0.25):int(len(together) * 0.375)], y[int(len(together) * 0.25):int(len(together) * 0.375)],\
+           data[int(len(together) * 0.375):int(len(together) * 0.5)], y[int(len(together) * 0.375):int(len(together) * 0.5)], \
+           data[int(len(together) * 0.5):], y[int(len(together) * 0.5):]
 
 
 def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
@@ -73,13 +75,10 @@ def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
     data = data.merge(dfs[3], on='number')
     data = data.drop(columns=['number'])
     labels = labels.drop(columns=['number'])
-    labels = labels.drop(['OBJECTID', 'pubDate', 'linqmap_reliability', 'update_date', 'linqmap_roadType_1',
-                 'linqmap_roadType_2', 'linqmap_roadType_4', 'linqmap_roadType_16',
-                 'linqmap_roadType_17', 'linqmap_roadType_20', 'linqmap_roadType_22'])
     return data, labels
 
 
 if __name__ == '__main__':
     df, labels = preprocess_first_task(load_data('waze_data.csv'))
 
-    # training_X, baseline_X, evaluation_X, test_X, training_y, baseline_y, evaluation_y, test_y  = split_data(df, labels)
+    training, baseline, evaluation, test = split_data(df, labels)
