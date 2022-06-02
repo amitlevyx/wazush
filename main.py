@@ -1,12 +1,31 @@
 import numpy as np
-
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
 import baselines
 from estimator import Estimator
 from preproccess import preprocess_first_task, load_data, split_data, preprocess_task2
 
 
-if __name__ == '__main__':
+# def plot_graph(data: pd.DataFrame):
+#
+#     # plot number of events per day
+#
+#     # groupby_event = data.groupby('Country', as_index=False).apply(calc_loss)
+#     # figIsraelCountries = px.bar(groupby_country, x='Country', y='Loss',
+#     #                             title="Countries loss over model fitted for Israel.")
+#     # fig = go.Figure([go.Bar(x=data['day_of_week'], y=data.groupby("day_of_week"), name='accident'),
+#     #                  go.Bar(x=data['day_of_week'], y=data[data['linqmap_type_JAM'] == 1].shape[0], name='jam'),
+#     #                  go.Bar(x=data['day_of_week'], y=data[data['linqmap_type_ROAD_CLOSED'] == 1].shape[0], name='road closed'),
+#     #                  go.Bar(x=data['day_of_week'], y=data[data['linqmap_type_WEATHERHAZARD'] == 1].shape[0], name='weather')])
+#     # fig.show()
+#     # data = data.groupby("day_of_week", as_index=False).apply(lambda x: )
+#     # fig = px.bar(data, x="1", y=["linqmap_type_ROAD_CLOSED", "linqmap_type_ACCIDENT", "linqmap_type_JAM",
+#     #                                        "linqmap_type_WEATHERHAZARD"])
+#     # fig.show()
+#
 
+if __name__ == '__main__':
     np.random.seed(0)
     types_and_subtypes_cols = ['linqmap_type_ACCIDENT', 'linqmap_type_JAM',
                                'linqmap_type_ROAD_CLOSED', 'linqmap_type_WEATHERHAZARD',
@@ -25,11 +44,14 @@ if __name__ == '__main__':
                                'linqmap_subtype_ROAD_CLOSED_EVENT']
 
     df, labels = preprocess_first_task(load_data('waze_data.csv'))
+    # df = preprocess_task2(load_data('waze_data.csv'))
+    # plot_graph(df)
     labels = labels.drop(columns=types_and_subtypes_cols, axis=1)
     training_X, training_y, baseline_X, baseline_y, evaluation_X, evaluation_y, test_X, test_y = split_data(df, labels)
+    print(df.corrwith(labels).sort_values(ascending=False, key=abs).to_string())
     task1_baseline = baselines.task1_baseline(training_X, training_y)
     print(baselines.task1_baseline_score(task1_baseline.predict(baseline_X), baseline_y.to_numpy()))
-    df = preprocess_task2(load_data('waze_data.csv'))
+    # df = preprocess_task2(load_data('waze_data.csv'))
     #
     # # baseline_y_classifier = baseline_y.drop(['x', 'y'], axis=1)
     # # classifier_labels = training_y.drop(['x', 'y'], axis=1)
