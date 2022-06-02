@@ -50,7 +50,7 @@ def split_data(df: pd.DataFrame, labels) -> Tuple[pd.DataFrame, pd.DataFrame, pd
            data[int(len(together) * 0.5):], y[int(len(together) * 0.5):]
 
 
-def preprocess_first_task(data: pd.DataFrame) -> Tuple[Any, Any]:
+def preprocess_first_task(data: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
     data = data.drop_duplicates(subset=['OBJECTID'])
     data = data.loc[data['linqmap_city'] == 'תל אביב - יפו']
     linqmap_reliability_median = data['linqmap_reliability'].median()
@@ -115,11 +115,14 @@ def add_dist_to_data(data):
         lambda x: distance.euclidean(x[["event_3_x", "event_3_y"]], x[["event_4_x", "event_4_y"]]), axis=1)
     return data
 
+
 def add_time_columns_to_data(data):
     data['update_date'] = data['update_date'].apply(lambda d: datetime.utcfromtimestamp(d / 1000))
     data['day'] = data['update_date'].apply(lambda d: d.day)
     data['day_in_month'] = data['update_date'].apply(lambda d: d.days_in_month)
     data['day_of_week'] = data['update_date'].apply(lambda d: d.day_of_week)
+    data['not_weekend'] = data['update_date'].apply(lambda d: 1 if d.day_of_week in [0, 4, 5, 6] else 0)
+    data['weekend'] = data['update_date'].apply(lambda d: 1 if d.day_of_week in [1, 2, 3] else 0)
     data['month'] = data['update_date'].apply(lambda d: d.month)
     data['year'] = data['update_date'].apply(lambda d: d.year)
     data['hour'] = data['update_date'].apply(lambda d: d.hour)
@@ -134,7 +137,6 @@ def preprocess_task2(data: pd.DataFrame):
 
     # convert update_date column to datetime format and split date and time
     data = add_time_columns_to_data(data)
-
 
     # for each sample mark in which time slot it is
     morning_timeslot = data['update_date'].apply(lambda t: (1 if 8 <= t.hour
