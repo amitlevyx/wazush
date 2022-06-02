@@ -15,3 +15,6 @@ from sklearn.tree import DecisionTreeClassifier
 
 from IMLearn.base import BaseEstimator
 
+
+
+def fit(X, y):
