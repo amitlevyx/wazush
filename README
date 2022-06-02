@@ -1,3 +1,13 @@
+IMPORTANT NOTES -
+each one open a py fie in the individual folder, when finished add the the main files and commit
+
+'''
+
+"""
+
+
+
+
 TODO:
 * read about time series
 * currently the data is divided in to 5 parts, 4 to train and 1 to test
@@ -7,7 +17,8 @@ ideas for future:
 - check if an id appears in more than one part
 - check if anu other factor is important
 - ideas for adding or improving the features
--
+- adding distance between two features
+- adding subtypes of features
 
 
 MOR -
