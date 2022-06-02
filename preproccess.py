@@ -19,8 +19,8 @@ def load_data(path: str) -> pd.DataFrame:
         The data as a pandas dataframe.
     """
     # remove outliers
-    df = pd.read_csv(path)
-    print(df[df["linqmap_city"] == "תל אביב"])
+    return pd.read_csv(path)
+
 
 
 def split_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -41,13 +41,6 @@ def split_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFra
     return together[:int(len(together)*0.25)], \
            together[int(len(together)*0.25):int(len(together)*0.375)], \
            together[int(len(together)*0.375):int(len(together)*0.5)], \
-           together[int(len(together)*0.75):]
+           together[int(len(together)*0.5):]
 
 
-def preproccess(df: pd.DataFrame) -> pd.DataFrame:
-    "       "
-
-
-
-if __name__ == '__main__':
-    load_data("waze_data.csv")
