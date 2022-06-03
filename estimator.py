@@ -139,23 +139,9 @@ class Estimator_REG:
     def predict_reg(self, X):
         return self.estimator_x.predict(pre_for_x(X)), self.estimator_y.predict(pre_for_y(X))
 
-
-class Estimator:
-    def __init__(self):
-        self._classifier = MultiOutputClassifier(KNeighborsClassifier(225))
-        self.regressor = Estimator_REG()
-
-    def fit_classifier(self, X, y):
-        self._classifier.fit(X, y)
-        self.regressor.fit_reg(X, y)
-
-    def predict_classifier(self, X):
-        return self._classifier.predict(X), self.regressor.predict_reg(X)
-
     def loss_classifier(self, X, y):
-        x_pred, y_pred = self.regressor.predict_reg(X)
-        return f1_score(y, self._classifier.predict(X), average='macro'), score_func(pre_label("y", y), y_pred,
-                                                                                     pre_label("x", y),
-                                                                                     x_pred)
+        x_pred, y_pred = self.predict_reg(X)
+        return score_func(pre_label("y", y), y_pred, pre_label("x", y), x_pred)
+
 
 
