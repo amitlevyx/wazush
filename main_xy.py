@@ -1,7 +1,11 @@
 import random
 
 import pandas as pd
+from matplotlib import pyplot as plt
 from sklearn.model_selection import GridSearchCV
+
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 from baselines import *
 from sklearn.metrics import mean_squared_error
@@ -154,26 +158,37 @@ if __name__ == '__main__':
     x_base = pre_for_x(baseline_X)
     y_base = pre_for_y(baseline_X)
 
-    estimator_x_f = RandomForestRegressor(n_estimators=1000, random_state=18, criterion='squared_error')
-    estimator_x_f.fit(pre_for_x(training_X), x_true)
-
-    estimator_y_f = RandomForestRegressor(n_estimators=1000, random_state=18, criterion='squared_error')
-    estimator_y_f.fit(pre_for_y(training_X), y_true)
-
-
-    print("Random Forest")
-    x_pred_1 = estimator_x_f.predict(pre_for_x(evaluation_X))
-    y_pred_1 = estimator_y_f.predict(pre_for_y(evaluation_X))
-    print(mean_squared_error(pre_label("x",evaluation_y), x_pred_1))
-    print(mean_squared_error(pre_label("y",evaluation_y), y_pred_1))
-    print(score_func(pre_label("y",evaluation_y), y_pred_1, pre_label("x",evaluation_y), x_pred_1))
+    # estimator_x_f = RandomForestRegressor(n_estimators=1000, random_state=18, criterion='squared_error')
+    # estimator_x_f.fit(pre_for_x(training_X), x_true)
+    #
+    # estimator_y_f = RandomForestRegressor(n_estimators=1000, random_state=18, criterion='squared_error')
+    # estimator_y_f.fit(pre_for_y(training_X), y_true)
+    # print("Random Forest")
+    # x_pred_1 = estimator_x_f.predict(pre_for_x(evaluation_X))
+    # y_pred_1 = estimator_y_f.predict(pre_for_y(evaluation_X))
+    # print(mean_squared_error(pre_label("x",evaluation_y), x_pred_1))
+    # print(mean_squared_error(pre_label("y",evaluation_y), y_pred_1))
+    # print(score_func(pre_label("y",evaluation_y), y_pred_1, pre_label("x",evaluation_y), x_pred_1))
 
     est = Estimator_REG()
     est.fit_reg(training_X, training_y)
     x_pred_2, y_pred_2 = est.predict_reg(evaluation_X)
     print(score_func(pre_label("y",evaluation_y), y_pred_2, pre_label("x",evaluation_y), x_pred_2))
 
-
+    # draw graph
+    y = pre_label("y", evaluation_y)
+    x = pre_label("x", evaluation_y)
+    """make 2 plots one next to the other, one for the predict and one for the true"""
+    fig = make_subplots(rows=1, cols=2, subplot_titles=[f"Predicted",
+                                                        f"True"])
+    fig.add_trace(go.Scatter(x=x_pred_2, y=y_pred_2, mode="markers",
+                             showlegend=False),
+                  row=1, col=1)
+    fig.add_trace(go.Scatter(x=x, y=y, mode="markers",
+                             showlegend=False), row=1, col=2)
+    fig.update_layout(title=f"The difference between the true x,y coordinates and the predicted coordinates",
+                      xaxis_title="x", yaxis_title="y", title_x=0.5)
+    fig.show()
     # print("Process")
     # x_pred = estimator_x_l.predict(pre_for_x(baseline_X))
     # y_pred = estimator_y_l.predict(pre_for_y(baseline_X))
