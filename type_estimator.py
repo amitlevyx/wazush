@@ -39,7 +39,7 @@ class TypeEstimator:
         self._classifier.fit(X, y)
 
     def predict_classifier(self, X):
-        return self._classifier.predict(X)
+        return self._classifier.predict(X).reshape(-1, 1)
 
     def loss_classifier(self, X, y):
         return f1_score(y, self.predict_classifier(X), average='macro')
