@@ -229,7 +229,7 @@ def run_task1(path: str, X):
     # predict x ,y
     x_pred, y_pred = x_y_model.predict_reg(X)
     print("xy loss: ", x_y_model.loss_reg(X, test_y.drop(['linqmap_type', 'linqmap_subtype'], axis=1)))
-
+    x_y_model.draw_diff(X, test_y)
     # merge prediction
     prediction = np.concatenate([types_pred, subtypes_pred, x_pred.reshape(-1, 1), y_pred.reshape(-1, 1)], axis=1)
     return prediction
