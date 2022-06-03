@@ -55,4 +55,5 @@ def preprocess_first_task(data: pd.DataFrame) -> pd.DataFrame:
     return data, labels
 
 
+
 preprocess_first_task(load_data('waze_data.csv'))
