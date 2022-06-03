@@ -1,36 +1,5 @@
-IMPORTANT NOTES -
-each one open a py fie in the individual folder, when finished add the the main files and commit
-
-'''
-
-"""
-
-
-
-
-TODO:
-* read about time series
-* currently the data is divided in to 5 parts, 4 to train and 1 to test
-
-
-ideas for future:
-- check if an id appears in more than one part
-- check if anu other factor is important
-- ideas for adding or improving the features
-- adding distance between two features
-- adding subtypes of features
-
-
-MOR -
-add more points to tel aviv by intersecting the points with the points of the other cities
-
-""
-
-- IRIS
-split the data and pre processing
-
-AMIT -
-
-
-ROTEM -
-base line
+preprocessing.py - in charge of preprocessing of the data
+subtype_estimator.py - in charge of the subtype estimation. This is the class for the classifier that is used to estimate the subtype of the event.
+type_estimator.py - in charge of the type estimation. This is the class for the classifier that is used to estimate the main type of the event.
+estimator.py - in charge of the x,y estimation. This is the class for the regressor that is used to estimate the event's x,y position.
+baselines.py - in charge of the baseline estimation. This file contains the baseline classifier and regressor for task 1 and the baseline learner for task 2.
