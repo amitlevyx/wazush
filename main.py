@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import baselines
 # from estimator import Estimator
-from utils import *
+# from utils import *
 from preproccess import preprocess_first_task, load_data, split_data, \
     preprocess_task2
 from subtype_estimator import SubtypeEstimator
@@ -191,8 +191,18 @@ def extract_subtypes_from_pred(subtypes_pred):
 
 def run_task1(path: str, X):
     np.random.seed(0)
+    types_cols = ['linqmap_type']
+    subtypes_cols = ['linqmap_subtype']
 
     data, labels = preprocess_first_task(load_data(path))
+    training_X, training_y, baseline_X, baseline_y, evaluation_X, \
+    evaluation_y, test_X, test_y = split_data(data, labels)
+    training_X = pd.concat([training_X, baseline_X, evaluation_X], axis=0)
+    training_y = pd.concat([training_y, baseline_y, evaluation_y], axis=0)
+
+    data = training_X
+    labels = training_y
+
     classifier_labels = labels.drop(['x', 'y'], axis=1)
     type_model_labels = classifier_labels.drop(subtypes_cols, axis=1)
     subtype_model_labels = classifier_labels.drop(types_cols, axis=1)
@@ -211,11 +221,15 @@ def run_task1(path: str, X):
 
 
     types_pred = types_model.predict_classifier(X)
-    types_pred = extract_types_from_pred(types_pred)
+    print("types loss: ", types_model.loss_classifier(X, test_y))
+    # types_pred = extract_types_from_pred(types_pred)
     subtypes_pred = subtypes_model.predict_classifier(X)
-    subtypes_pred = extract_subtypes_from_pred(subtypes_pred)
+    print("subtypes loss: ", subtypes_model.loss_classifier(X, test_y))
+    # subtypes_pred = extract_subtypes_from_pred(subtypes_pred)
+
     # predict x ,y
     x_pred, y_pred = x_y_model.predict_reg(X)
+    print("xy loss: ", x_y_model.loss_reg(X, test_y))
 
     # merge prediction
     prediction = np.concatenate([types_pred, subtypes_pred, x_pred, y_pred],
@@ -247,8 +261,12 @@ if __name__ == '__main__':
     # baseline_y.to_numpy()))
     # df = preprocess_task2(load_data('waze_data.csv'))
     # reg_labels = training_y.drop(types_and_subtypes_cols, axis=1)
-    df, labels = preprocess_first_task(load_data('waze_data.csv'))
-    validation(df, labels)
+    # validation(df, labels)
 
+    df, labels = preprocess_first_task(load_data('waze_data.csv'))
+    training_X, training_y, baseline_X, baseline_y, evaluation_X, \
+    evaluation_y, test_X, test_y = split_data(df, labels)
+
+    run_task1('waze_data.csv', test_X)
 
     # run_task1('waze_data.csv', test_X)
