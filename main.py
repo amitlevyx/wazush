@@ -9,6 +9,7 @@ from subtype_estimator import SubtypeEstimator
 from estimator import Estimator_REG
 from type_estimator import TypeEstimator
 
+
 # def run_baseline(df, labels):
 #     training_X, training_y, baseline_X, baseline_y, evaluation_X, \
 #     evaluation_y, test_X, test_y = split_data(df, labels)
@@ -88,11 +89,10 @@ def validation(df, labels):
     max_subtypes_evaluation_scores = []
 
     for est in range(20, 221, 20):
-
-    # evaluation_scores = []
+        # evaluation_scores = []
         types_evaluation_scores = []
         subtypes_evaluation_scores = []
-    # for dep in range(5, 21):
+        # for dep in range(5, 21):
         validation_y_classifier = evaluation_y.drop(['x', 'y'], axis=1)
         classifier_labels = training_y.drop(['x', 'y'], axis=1)
 
@@ -142,7 +142,7 @@ def validation(df, labels):
         #     training_X, classifier_subtype_labels))
         print("The subtypes validation f1score is:",
               subtypes_model.loss_classifier(
-            evaluation_X, validation_y_classifier_subtypes))
+                  evaluation_X, validation_y_classifier_subtypes))
         print()
 
     # max_evaluation_scores.append(np.max(evaluation_scores))
@@ -177,13 +177,13 @@ def extract_types_from_pred(types_pred):
 
 def extract_subtypes_from_pred(subtypes_pred):
     types = ['ACCIDENT_MAJOR', 'ACCIDENT_MINOR', 'HAZARD_ON_ROAD',
-                     'HAZARD_ON_ROAD_CAR_STOPPED',
-                     'HAZARD_ON_ROAD_CONSTRUCTION',
-                     'HAZARD_ON_ROAD_OBJECT', 'HAZARD_ON_ROAD_POT_HOLE',
-                     'HAZARD_ON_ROAD_TRAFFIC_LIGHT_FAULT',
-                     'HAZARD_ON_SHOULDER_CAR_STOPPED', 'JAM_HEAVY_TRAFFIC',
-                     'JAM_MODERATE_TRAFFIC', 'JAM_STAND_STILL_TRAFFIC',
-                     'ROAD_CLOSED_CONSTRUCTION', 'ROAD_CLOSED_EVENT']
+             'HAZARD_ON_ROAD_CAR_STOPPED',
+             'HAZARD_ON_ROAD_CONSTRUCTION',
+             'HAZARD_ON_ROAD_OBJECT', 'HAZARD_ON_ROAD_POT_HOLE',
+             'HAZARD_ON_ROAD_TRAFFIC_LIGHT_FAULT',
+             'HAZARD_ON_SHOULDER_CAR_STOPPED', 'JAM_HEAVY_TRAFFIC',
+             'JAM_MODERATE_TRAFFIC', 'JAM_STAND_STILL_TRAFFIC',
+             'ROAD_CLOSED_CONSTRUCTION', 'ROAD_CLOSED_EVENT']
     indexes = np.where(subtypes_pred == 1)
     predictions = np.apply_along_axis(lambda row: types[row], 0, indexes)
     return predictions
@@ -210,31 +210,30 @@ def run_task1(path: str, X):
     # Initialize and fit models to predict x, y, type and subtype of next
     # event for each sequence
 
-    types_model = TypeEstimator(est=180).fit_classifier(data,
-                                                             type_model_labels)
-    subtypes_model = SubtypeEstimator(est=20).fit_classifier(data,
-                                                        subtype_model_labels)
-    x_y_model = Estimator_REG().fit_reg(data, labels)
-
+    types_model = TypeEstimator(est=180)
+    types_model.fit_classifier(data, type_model_labels)
+    subtypes_model = SubtypeEstimator(est=20)
+    subtypes_model.fit_classifier(data, subtype_model_labels)
+    x_y_model = Estimator_REG()
+    x_y_model.fit_reg(data, labels)
 
     # preprocess X
 
-
     types_pred = types_model.predict_classifier(X)
-    print("types loss: ", types_model.loss_classifier(X, test_y))
+    print("types loss: ", types_model.loss_classifier(X, test_y['linqmap_type']))
     # types_pred = extract_types_from_pred(types_pred)
     subtypes_pred = subtypes_model.predict_classifier(X)
-    print("subtypes loss: ", subtypes_model.loss_classifier(X, test_y))
+    print("subtypes loss: ", subtypes_model.loss_classifier(X, test_y['linqmap_subtype']))
     # subtypes_pred = extract_subtypes_from_pred(subtypes_pred)
 
     # predict x ,y
     x_pred, y_pred = x_y_model.predict_reg(X)
-    print("xy loss: ", x_y_model.loss_reg(X, test_y))
-
+    print("xy loss: ", x_y_model.loss_reg(X, test_y.drop(['linqmap_type', 'linqmap_subtype'], axis=1)))
+    x_y_model.draw_diff(X, test_y)
     # merge prediction
-    prediction = np.concatenate([types_pred, subtypes_pred, x_pred, y_pred],
-                                axis=1)
+    prediction = np.concatenate([types_pred, subtypes_pred, x_pred.reshape(-1, 1), y_pred.reshape(-1, 1)], axis=1)
     return prediction
+
 
 if __name__ == '__main__':
     np.random.seed(0)

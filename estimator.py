@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from typing import NoReturn, Tuple
-
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import AdaBoostClassifier, BaggingClassifier, ExtraTreesClassifier, GradientBoostingClassifier, \
@@ -15,6 +16,18 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.dummy import DummyRegressor
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
+
+def draw_diff(y_true, y_pred, x_true, x_pred):
+    fig = make_subplots(rows=1, cols=2, subplot_titles=[f"Predicted",
+                                                        f"True"])
+    fig.add_trace(go.Scatter(x=x_pred, y=y_pred, mode="markers",
+                             showlegend=False),
+                  row=1, col=1)
+    fig.add_trace(go.Scatter(x=x_true, y=y_true, mode="markers",
+                             showlegend=False), row=1, col=2)
+    fig.update_layout(title=f"The difference between the true x,y coordinates and the predicted coordinates",
+                      xaxis_title="x", yaxis_title="y", title_x=0.5)
+    fig.show()
 
 
 def pre_label(type_ax, data: pd.DataFrame) -> pd.DataFrame:
@@ -142,6 +155,9 @@ class Estimator_REG:
     def loss_reg(self, X, y):
         x_pred, y_pred = self.predict_reg(X)
         return score_func(pre_label("y", y), y_pred, pre_label("x", y), x_pred)
+    def draw_diff(self, X ,y):
+        x_pred, y_pred = self.predict_reg(X)
+        draw_diff(pre_label("y", y), y_pred, pre_label("x", y), x_pred)
 
 
 
