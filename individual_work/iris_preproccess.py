@@ -110,11 +110,11 @@ def preprocess_first_task(data: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFram
     data = df.groupby(np.repeat(np.arange(len(df)), 4)[:len(df)]).agg(' '.join)
     return data, labels
 
-
-if __name__ == '__main__':
-    df = load_data('../waze_data.csv')
-    analyze_data(df)
-    print("done")
-    # df, labels = preprocess_first_task(df)
-
-    # training, baseline, evaluation, test = split_data(df)
+#
+# if __name__ == '__main__':
+#     df = load_data('../waze_data.csv')
+#     analyze_data(df)
+#     print("done")
+#     # df, labels = preprocess_first_task(df)
+#
+#     # training, baseline, evaluation, test = split_data(df)
